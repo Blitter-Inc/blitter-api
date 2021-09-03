@@ -52,9 +52,9 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     # Apps
-    'bill',
-    'event',
-    'user',
+    'blitter.bill',
+    'blitter.event',
+    'blitter.user',
     # Libraries
     'corsheaders',
     'django_filters',
