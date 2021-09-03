@@ -1,5 +1,7 @@
-# Virtual Environment
+# Environment
 env
+.env*
+!.env.sample
 
 # Python Cache Files
 __pycache__
@@ -7,3 +9,5 @@ __pycache__
 # VSCode Config
 .vscode
 
+# Database
+db.sqlite3

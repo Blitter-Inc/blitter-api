@@ -10,7 +10,21 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.2/ref/settings/
 """
 
+import os
 from pathlib import Path
+from dotenv import dotenv_values
+
+
+# Setup environment variables
+DEV_ENV_CONFIG = dotenv_values('../.env.development') or dict()
+PROD_ENV_CONFIG = dotenv_values('../.env.production') or dict()
+
+ENV_CONFIG = {
+    **DEV_ENV_CONFIG,
+    **PROD_ENV_CONFIG,
+    **os.environ,
+}
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -20,10 +34,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-xls=ax&_s)uuu713h=s-j($-6tg4ctckmxr+9h8se$tyia%xun'
+SECRET_KEY = ENV_CONFIG.get('DJANGO_SECRET', 'django-insecure-xls=ax&_s)uuu713h=s-j($-6tg4ctckmxr+9h8se$tyia%xun')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = bool(int(ENV_CONFIG.get('DJANGO_DEBUG', '1')))
 
 ALLOWED_HOSTS = []
 
