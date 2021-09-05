@@ -1,8 +1,11 @@
-from django.contrib.auth.models import AbstractBaseUser
+from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
 from django.db import models
+from django.utils import timezone
+
+from .manager import UserManager
 
 
-class User(AbstractBaseUser):
+class User(AbstractBaseUser, PermissionsMixin):
 
     name = models.CharField('Name', max_length=254, blank=False)
     phone = models.CharField('Phone', max_length=18, blank=False, unique=True)
@@ -10,6 +13,9 @@ class User(AbstractBaseUser):
     bio = models.TextField('Bio', blank=True, null=True)
     avatar = models.FileField(
         'Avatar', upload_to='media/user/avatar', blank=True, null=True)
+    date_joined = models.DateTimeField('Date joined', default=timezone.now)
+
+    objects = UserManager()
 
     USERNAME_FIELD = 'phone'
     EMAIL_FIELD = 'email'
