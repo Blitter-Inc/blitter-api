@@ -54,6 +54,7 @@ INSTALLED_APPS = [
     # Apps
     'blitter.bill',
     'blitter.event',
+    'blitter.shared',
     'blitter.user',
     # Libraries
     'corsheaders',
