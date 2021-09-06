@@ -18,9 +18,9 @@ class UserManager(BaseUserManager):
         return user
 
     def create_user(self, phone, password=None, **kwargs):
-        kwargs.setdefault('is_superuser', False)
         return self._create_user(phone, password, **kwargs)
 
     def create_superuser(self, phone, password, **kwargs):
         kwargs.setdefault('is_superuser', True)
+        kwargs.setdefault('is_staff', True)
         return self._create_user(phone, password, **kwargs)
