@@ -35,7 +35,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = ENV_CONFIG.get('DJANGO_SECRET', 'django-insecure-xls=ax&_s)uuu713h=s-j($-6tg4ctckmxr+9h8se$tyia%xun')
+SECRET_KEY = ENV_CONFIG.get(
+    'DJANGO_SECRET', 'django-insecure-xls=ax&_s)uuu713h=s-j($-6tg4ctckmxr+9h8se$tyia%xun')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = bool(int(ENV_CONFIG.get('DJANGO_DEBUG', '1')))

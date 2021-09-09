@@ -8,7 +8,8 @@ from .manager import UserManager
 
 class User(TimestampMixin, AbstractBaseUser, PermissionsMixin):
 
-    firebase_id = models.CharField("Firebase ID", max_length=254, blank=False, unique=True)
+    firebase_id = models.CharField(
+        "Firebase ID", max_length=254, blank=False, unique=True)
     name = models.CharField('Name', max_length=254, blank=False)
     phone = models.CharField('Phone', max_length=18, blank=False, unique=True)
     email = models.EmailField('Email', blank=True, null=True, unique=True)
