@@ -1,46 +1,37 @@
-from django.db import models
-from django.db.models import fields
+from django.contrib.auth import get_user_model
 from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
-from django.contrib.auth import get_user_model
-from django.core.exceptions import ValidationError
+
+
+UserModel = get_user_model()
 
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
-        model = get_user_model()
-        fields = '__all__'
+        model = UserModel
+        fields = ['id', 'firebase_id', 'name', 'phone',
+                  'email', 'avatar', 'bio', 'date_joined']
+        extra_kwargs = {
+            'firebase_id': {'write_only': True}
+        }
 
 
-class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-        self.fields[self.username_field] = serializers.CharField()
-        self.fields['password'] = serializers.CharField(required=False)
+class CustomTokenObtainPairSerializer(serializers.Serializer):
+    firebase_id = serializers.CharField()
+    name = serializers.CharField(required=False)
+    phone = serializers.CharField()
+    email = serializers.EmailField(
+        allow_blank=True, allow_null=True, required=False)
+    avatar = serializers.FileField(required=False, allow_empty_file=True)
+    bio = serializers.CharField(allow_blank=True, required=False)
 
     def validate(self, attrs):
-        data = self.context['request'].data
-        required_keys = ['phone', 'firebase_id']
-
-        for key in required_keys:
-            if key not in data:
-                raise ValidationError(f'Provide {key}')
-
-        queryset = get_user_model().objects.filter(phone=data['phone'])
-        if not queryset:
-            user = get_user_model().objects.create_user(**data)
-        else:
-            validated_user = queryset.filter(
-                firebase_id=data['firebase_id'])
-            if not validated_user:
-                raise ValidationError('Invalid Firebase Id')
-            user = queryset.first()
-
-        token = self.get_token(user)
+        user, created = UserModel.objects.get_or_create(**attrs)
+        print(user)
+        token = TokenObtainPairSerializer.get_token(user)
 
         return {
-            'user': UserSerializer().to_representation(user),
+            'user': UserSerializer(user).data,
             'access_token': str(token.access_token),
             'refresh_token': str(token)
         }
