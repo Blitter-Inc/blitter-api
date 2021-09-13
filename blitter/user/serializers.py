@@ -27,7 +27,6 @@ class CustomTokenObtainPairSerializer(serializers.Serializer):
 
     def validate(self, attrs):
         user, created = UserModel.objects.get_or_create(**attrs)
-        print(user)
         token = TokenObtainPairSerializer.get_token(user)
 
         return {
