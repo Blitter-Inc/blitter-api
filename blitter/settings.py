@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 import os
 from pathlib import Path
 from dotenv import dotenv_values
+from datetime import timedelta
 
 
 # Setup environment variables
@@ -34,7 +35,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = ENV_CONFIG.get('DJANGO_SECRET', 'django-insecure-xls=ax&_s)uuu713h=s-j($-6tg4ctckmxr+9h8se$tyia%xun')
+SECRET_KEY = ENV_CONFIG.get(
+    'DJANGO_SECRET', 'django-insecure-xls=ax&_s)uuu713h=s-j($-6tg4ctckmxr+9h8se$tyia%xun')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = bool(int(ENV_CONFIG.get('DJANGO_DEBUG', '1')))
@@ -59,6 +61,7 @@ INSTALLED_APPS = [
     # Libraries
     'corsheaders',
     'django_filters',
+    'rest_framework_simplejwt',
 ]
 
 MIDDLEWARE = [
@@ -148,3 +151,14 @@ STATIC_URL = '/static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 AUTH_USER_MODEL = 'user.User'
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication'
+    ),
+}
+
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(days=365),
+    'USER_ID_FIELD': 'id',
+}
