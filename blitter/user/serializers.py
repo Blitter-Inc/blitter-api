@@ -27,11 +27,11 @@ class CustomTokenObtainPairSerializer(serializers.Serializer):
 
     def validate(self, attrs):
         user, created = UserModel.objects.get_or_create(**attrs)
-        print(user)
         token = TokenObtainPairSerializer.get_token(user)
 
         return {
             'user': UserSerializer(user).data,
             'access_token': str(token.access_token),
-            'refresh_token': str(token)
+            'refresh_token': str(token),
+            'is_new_user': True if created else False
         }
