@@ -165,3 +165,5 @@ SIMPLE_JWT = {
 }
 
 django_heroku.settings(locals())
+
+CORS_ALLOW_ALL_ORIGINS = True
