@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 """
 
 import os
+import django_heroku
 from datetime import timedelta
 from dotenv import dotenv_values
 from pathlib import Path
@@ -162,3 +163,5 @@ SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(days=365),
     'USER_ID_FIELD': 'id',
 }
+
+django_heroku.settings(locals())
