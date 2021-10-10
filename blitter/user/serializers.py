@@ -22,7 +22,7 @@ class CustomTokenObtainPairSerializer(serializers.Serializer):
     phone = serializers.CharField()
     email = serializers.EmailField(
         allow_blank=True, allow_null=True, required=False)
-    avatar = serializers.FileField(required=False, allow_empty_file=True)
+    avatar = serializers.FileField(required=False, allow_empty_file=True, use_url=True)
     bio = serializers.CharField(allow_blank=True, required=False)
 
     def validate(self, attrs):
