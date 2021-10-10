@@ -18,7 +18,7 @@ class Event(TimestampMixin, models.Model):
     end = models.DateTimeField('End', blank=True, null=True)
     venue = models.CharField('Event venue', max_length=254, blank=True)
     cover_image = models.FileField(
-        'Cover image', upload_to='media/event/event/cover_image', blank=True, null=True)
+        'Cover image', upload_to='event/cover_image', blank=True, null=True)
     created_by = models.ForeignKey(
         'user.User', on_delete=models.SET_NULL, related_name='created_events', null=True)
     members = models.ManyToManyField('user.User')
