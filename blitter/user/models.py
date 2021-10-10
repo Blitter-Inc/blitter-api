@@ -15,7 +15,7 @@ class User(TimestampMixin, AbstractBaseUser, PermissionsMixin):
     email = models.EmailField('Email', blank=True, null=True, unique=True)
     bio = models.TextField('Bio', blank=True)
     avatar = models.FileField(
-        'Avatar', upload_to='media/user/avatar', blank=True, null=True)
+        'Avatar', upload_to='user/avatar', blank=True, null=True)
     is_staff = models.BooleanField('Is staff', default=False)
     date_joined = models.DateTimeField('Date joined', default=timezone.now)
 

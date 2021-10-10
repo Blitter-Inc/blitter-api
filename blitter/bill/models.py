@@ -49,7 +49,7 @@ class BillAttachment(TimestampMixin, models.Model):
         'Bill', on_delete=models.CASCADE, related_name='attachments')
     name = models.CharField('Bill attachment name', max_length=254, blank=True)
     file = models.FileField(
-        'File', upload_to='media/bill/billattachment', blank=False)
+        'File', upload_to='bill/billattachment', blank=False)
 
     class Meta:
         db_table = 'bill_billattachment'
