@@ -6,8 +6,11 @@ from blitter.shared.models import TimestampMixin
 class Bill(TimestampMixin, models.Model):
 
     class BillType(models.TextChoices):
-        # TODO: Add more BillType choices
-        MISC = 'misc', 'Miscellaneous'
+        FOOD = 'food', 'Food'
+        SHOPPING = 'shopping', 'Shopping'
+        ENTERTAINMENT = 'entertainment', 'Entertainment'
+        OUTING = 'outing', 'Outing'
+        MISC = 'miscelleneous', 'Miscellaneous'
 
     name = models.CharField('Bill name', max_length=254, blank=True)
     amount = models.DecimalField(
@@ -33,6 +36,8 @@ class BillSubscriber(TimestampMixin, models.Model):
     user = models.ForeignKey('user.User', on_delete=models.CASCADE)
     amount = models.DecimalField(
         'Amount', max_digits=12, decimal_places=2, blank=False)
+    amount_paid = models.DecimalField(
+        'Amount paid', max_digits=12, decimal_places=2, default=0)
     fulfilled = models.BooleanField('Fullfilled', default=False)
 
     class Meta:
