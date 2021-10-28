@@ -3,6 +3,9 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import path, include
 
+
+handler500 = 'rest_framework.exceptions.server_error'
+
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('user/', include('blitter.user.urls')),
