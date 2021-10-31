@@ -1,4 +1,3 @@
-from django.db.models import prefetch_related_objects
 from rest_framework import serializers
 
 from . import models
