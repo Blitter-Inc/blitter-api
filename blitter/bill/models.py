@@ -32,7 +32,8 @@ class Bill(TimestampMixin, models.Model):
 
 
 class BillSubscriber(TimestampMixin, models.Model):
-    bill = models.ForeignKey('Bill', on_delete=models.CASCADE)
+    bill = models.ForeignKey(
+        'Bill', on_delete=models.CASCADE, related_name="subscriber_instances")
     user = models.ForeignKey('user.User', on_delete=models.CASCADE)
     amount = models.DecimalField(
         'Amount', max_digits=12, decimal_places=2, blank=False)
