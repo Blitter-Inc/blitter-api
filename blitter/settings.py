@@ -17,20 +17,18 @@ from dotenv import dotenv_values
 from pathlib import Path
 
 
-# Setup environment variables
-DEV_ENV_CONFIG = dotenv_values('../.env.development') or dict()
-PROD_ENV_CONFIG = dotenv_values('../.env.production') or dict()
-
-ENV_CONFIG = {
-    **DEV_ENV_CONFIG,
-    **PROD_ENV_CONFIG,
-    **os.environ,
-}
-
-
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# Setup environment variables
+DEV_ENV_CONFIG = dotenv_values(f'{BASE_DIR}/.env.development') or dict()
+PROD_ENV_CONFIG = dotenv_values(f'{BASE_DIR}/.env.production') or dict()
+
+ENV_CONFIG = {
+    **PROD_ENV_CONFIG,
+    **DEV_ENV_CONFIG,
+    **os.environ,
+}
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
@@ -62,6 +60,7 @@ INSTALLED_APPS = [
     # Libraries
     'corsheaders',
     'django_filters',
+    'rest_framework',
     'rest_framework_simplejwt',
 ]
 
@@ -161,6 +160,8 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
+    'DEFAULT_PAGINATION_CLASS': 'blitter.shared.pagination.ObjectMapPageNumberPagination',
+    'PAGE_SIZE': 100
 }
 
 SIMPLE_JWT = {
@@ -171,3 +172,33 @@ SIMPLE_JWT = {
 django_heroku.settings(locals())
 
 CORS_ALLOW_ALL_ORIGINS = True
+
+ENABLE_SQL_LOGGING = bool(ENV_CONFIG.get('ENABLE_SQL_LOGGING', 0))
+
+if DEBUG and ENABLE_SQL_LOGGING:
+    LOGGING = {
+        'disable_existing_loggers': False,
+        'version': 1,
+        'handlers': {
+            'console': {
+                # logging handler that outputs log messages to terminal
+                'class': 'logging.StreamHandler',
+                'level': 'DEBUG', # message level to be written to console
+            },
+        },
+        'loggers': {
+            '': {
+                # this sets root level logger to log debug and higher level
+                # logs to console. All other loggers inherit settings from
+                # root level logger.
+                'handlers': ['console'],
+                'level': 'DEBUG',
+                'propagate': False, # this tells logger to send logging message
+                                    # to its parent (will send if set to True)
+            },
+            'django.db': {
+                # django also has database level logging
+                'level': 'DEBUG'
+            },
+        },
+    }
