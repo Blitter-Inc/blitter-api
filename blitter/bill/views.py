@@ -1,4 +1,4 @@
-from django.db.models import Q
+from django.db.models import Q, Sum
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import permissions
 from rest_framework.viewsets import ModelViewSet
@@ -22,7 +22,11 @@ class BillViewSet(ModelViewSet):
         user_id = self.request.user.pk
         return models.Bill.objects.filter(
             Q(created_by__pk=user_id) | Q(subscribers__pk=user_id)
-        ).prefetch_related('subscriber_instances', 'attachments').distinct()
+        ).prefetch_related(
+            'subscriber_instances', 'attachments',
+        ).distinct().annotate(
+            settled_amount=Sum('subscriber_instances__amount_paid'),
+        )
 
     def get_serializer_class(self):
         if self.request.method == 'get':

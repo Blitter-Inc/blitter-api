@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 from django.db import models
 
 from blitter.shared.models import TimestampMixin
@@ -11,6 +12,11 @@ class Bill(TimestampMixin, models.Model):
         ENTERTAINMENT = 'entertainment', 'Entertainment'
         OUTING = 'outing', 'Outing'
         MISC = 'miscelleneous', 'Miscellaneous'
+
+    @dataclass
+    class BillStatus:
+        UNSETTLED = 'unsettled'
+        FULFILLED = 'fulfilled'
 
     name = models.CharField('Bill name', max_length=254, blank=True)
     amount = models.DecimalField(
