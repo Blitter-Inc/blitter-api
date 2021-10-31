@@ -26,7 +26,13 @@ class CustomTokenObtainPairSerializer(serializers.Serializer):
     bio = serializers.CharField(allow_blank=True, required=False)
 
     def validate(self, attrs):
-        user, created = UserModel.objects.get_or_create(**attrs)
+        user, created = UserModel.objects.get_or_create(phone=attrs['phone'], defaults={
+            'firebase_id': attrs.get('firebase_id'),
+            'name': attrs.get('name'),
+            'email': attrs.get('email'),
+            'avatar': attrs.get('avatar'),
+            'bio': attrs.get('bio'),
+        })
         token = TokenObtainPairSerializer.get_token(user)
 
         return {
