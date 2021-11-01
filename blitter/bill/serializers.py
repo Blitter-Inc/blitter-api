@@ -52,3 +52,51 @@ class BillReadSerializer(serializers.ModelSerializer):
             attachments, many=True,
             context={'request': self.context['request']},
         ).data
+
+
+class BillWriteSerializer(serializers.ModelSerializer):
+
+    class BillSubscriberNestedSerializer(serializers.ModelSerializer):
+
+        class Meta:
+            model = models.BillSubscriber
+            fields = [
+                'id', 'user_id', 'amount',
+                'amount_paid', 'fulfilled',
+            ]
+
+    class BillAttachmentNestedSerializer(serializers.Serializer):
+        name = serializers.CharField(required=False)
+        file = serializers.FileField()
+
+    attachments = BillAttachmentNestedSerializer(
+        many=True, required=False, allow_null=True)
+    subscribers = BillSubscriberNestedSerializer(
+        many=True, required=False, allow_null=True)
+
+    class Meta:
+        model = models.Bill
+        exclude = ['created_by']
+
+    def create_subscribers(self, bill, subscribers):
+        models.BillSubscriber.objects.bulk_create([
+            models.BillSubscriber(bill=bill, **obj)
+            for obj in subscribers
+        ])
+
+    def create_attachments(self, bill, attachments):
+        models.BillAttachment.objects.bulk_create([
+            models.BillAttachment(bill=bill, **obj)
+            for obj in attachments
+        ])
+
+    def create(self, validated_data):
+        user = self.context['request'].user
+        attachments = validated_data.pop('attachments', None)
+        subscribers = validated_data.pop('subscribers', None)
+        bill_obj = super().create({**validated_data, 'created_by': user})
+        if subscribers:
+            self.create_subscribers(bill_obj, subscribers)
+        if attachments:
+            self.create_attachments(bill_obj, attachments)
+        return bill_obj

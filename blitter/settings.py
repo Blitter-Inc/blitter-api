@@ -173,7 +173,7 @@ django_heroku.settings(locals())
 
 CORS_ALLOW_ALL_ORIGINS = True
 
-ENABLE_SQL_LOGGING = bool(ENV_CONFIG.get('ENABLE_SQL_LOGGING', 0))
+ENABLE_SQL_LOGGING = bool(int(ENV_CONFIG.get('ENABLE_SQL_LOGGING', '0')))
 
 if DEBUG and ENABLE_SQL_LOGGING:
     LOGGING = {
