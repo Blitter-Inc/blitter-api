@@ -7,6 +7,7 @@ class ObjectMapPageNumberPagination(PageNumberPagination):
     def get_paginated_response(self, data):
         res = {}
         res['count'] = self.page.paginator.count
+        res['page'] = self.page.number
         res['next'] = self.get_next_link()
         res['previous'] = self.get_previous_link()
         res['ordering'] = self.request.GET.get('ordering', '')
