@@ -15,15 +15,10 @@ class BillReadSerializer(serializers.ModelSerializer):
             ]
 
     class BillAttachmentNestedSerializer(serializers.ModelSerializer):
-        file = serializers.SerializerMethodField()
 
         class Meta:
             model = models.BillAttachment
             exclude = ['bill']
-
-        def get_file(self, obj):
-            request = self.context['request']
-            return request.build_absolute_uri(obj.file.url)
 
     status = serializers.SerializerMethodField()
     settled_amount = serializers.DecimalField(max_digits=12, decimal_places=2)
