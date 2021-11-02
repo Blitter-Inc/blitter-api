@@ -7,6 +7,7 @@ UserModel = get_user_model()
 
 
 class UserSerializer(serializers.ModelSerializer):
+
     class Meta:
         model = UserModel
         fields = ['id', 'firebase_id', 'name', 'phone',
@@ -22,7 +23,7 @@ class CustomTokenObtainPairSerializer(serializers.Serializer):
     phone = serializers.CharField()
     email = serializers.EmailField(
         allow_blank=True, allow_null=True, required=False)
-    avatar = serializers.FileField(required=False, allow_empty_file=True, use_url=True)
+    avatar = serializers.FileField(required=False, allow_empty_file=True)
     bio = serializers.CharField(allow_blank=True, required=False)
 
     def validate(self, attrs):
@@ -36,8 +37,21 @@ class CustomTokenObtainPairSerializer(serializers.Serializer):
         token = TokenObtainPairSerializer.get_token(user)
 
         return {
-            'user': UserSerializer(user).data,
+            'user': UserSerializer(user, context={'request': self.context['request']}).data,
             'access_token': str(token.access_token),
             'refresh_token': str(token),
             'is_new_user': True if created else False
         }
+
+
+class FetchProfilesSerializer(serializers.Serializer):
+    phone_numbers = serializers.ListField(child=serializers.CharField())
+
+    def validate(self, attrs):
+        phone_numbers = attrs['phone_numbers']
+        user_objects = UserModel.objects.filter(phone__in=phone_numbers)
+        profiles = UserSerializer(
+            user_objects, many=True,
+            context={'request': self.context['request']},
+        ).data
+        return {profile['id']: profile for profile in profiles}

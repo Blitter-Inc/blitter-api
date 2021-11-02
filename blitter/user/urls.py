@@ -2,14 +2,14 @@ from django.urls import path
 from rest_framework_simplejwt.views import TokenRefreshView
 from rest_framework.routers import DefaultRouter
 
-from .views import CustomTokenObtainPairView, UserUpdateView
+from . import views
 
 
 router = DefaultRouter()
-router.register('update', UserUpdateView, basename='update_user')
+router.register('', views.UserViewSet, basename='user')
 
 urlpatterns = [
-    path('login/', CustomTokenObtainPairView.as_view()),
+    path('login/', views.CustomTokenObtainPairView.as_view()),
     path('refresh/', TokenRefreshView.as_view())
 ]
 
