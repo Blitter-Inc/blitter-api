@@ -48,10 +48,12 @@ class FetchProfilesSerializer(serializers.Serializer):
     phone_numbers = serializers.ListField(child=serializers.CharField())
 
     def validate(self, attrs):
+        request = self.context['request']
         phone_numbers = attrs['phone_numbers']
+        phone_numbers.append(request.user.phone)       # fetching profile for current user as well
         user_objects = UserModel.objects.filter(phone__in=phone_numbers)
         profiles = UserSerializer(
             user_objects, many=True,
-            context={'request': self.context['request']},
+            context={'request': request},
         ).data
         return {profile['id']: profile for profile in profiles}
