@@ -22,9 +22,9 @@ class BillViewSet(ModelViewSet):
         user_id = self.request.user.pk
         return models.Bill.objects.filter(
             Q(created_by__pk=user_id) | Q(subscribers__pk=user_id)
-        ).prefetch_related(
+        ).distinct().prefetch_related(
             'subscriber_instances', 'attachments',
-        ).distinct().annotate(
+        ).annotate(
             settled_amount=Sum('subscriber_instances__amount_paid'),
         )
 
