@@ -26,7 +26,6 @@ class Bill(TimestampMixin, models.Model):
     description = models.TextField('Description', blank=True)
     created_by = models.ForeignKey(
         'user.User', on_delete=models.SET_NULL, related_name='created_bills', null=True)
-    subscribers = models.ManyToManyField('user.User', through='BillSubscriber')
 
     class Meta:
         db_table = 'bill_bill'
@@ -39,8 +38,9 @@ class Bill(TimestampMixin, models.Model):
 
 class BillSubscriber(TimestampMixin, models.Model):
     bill = models.ForeignKey(
-        'Bill', on_delete=models.CASCADE, related_name="subscriber_instances")
-    user = models.ForeignKey('user.User', on_delete=models.CASCADE)
+        'Bill', on_delete=models.CASCADE, related_name="subscribers")
+    user = models.ForeignKey(
+        'user.User', on_delete=models.CASCADE, related_name="subscribed_bills")
     amount = models.DecimalField(
         'Amount', max_digits=12, decimal_places=2, blank=False)
     amount_paid = models.DecimalField(
