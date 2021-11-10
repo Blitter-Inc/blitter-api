@@ -53,10 +53,14 @@ class BillWriteSerializer(serializers.ModelSerializer):
         many=True, required=False, allow_null=True)
     subscribers = BillSubscriberNestedSerializer(
         many=True, required=False, allow_null=True)
+    created_by = serializers.SerializerMethodField()
 
     class Meta:
         model = models.Bill
-        exclude = ['created_by']
+        fields = '__all__'
+
+    def created_by(self, obj):
+        return obj.created_by
 
     def create_subscribers(self, bill, subscribers):
         models.BillSubscriber.objects.bulk_create([
