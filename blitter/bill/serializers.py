@@ -3,16 +3,14 @@ from rest_framework import serializers
 from . import models, utils
 
 
+class BillSubscriberNestedSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = models.BillSubscriber
+        exclude = ['bill']
+
+
 class BillReadSerializer(serializers.ModelSerializer):
-
-    class BillSubscriberNestedSerializer(serializers.ModelSerializer):
-
-        class Meta:
-            model = models.BillSubscriber
-            fields = [
-                'id', 'user_id', 'amount', 'amount_paid',
-                'fulfilled', 'created_at', 'updated_at',
-            ]
 
     class BillAttachmentNestedSerializer(serializers.ModelSerializer):
 
@@ -22,7 +20,7 @@ class BillReadSerializer(serializers.ModelSerializer):
 
     status = serializers.SerializerMethodField()
     settled_amount = serializers.DecimalField(max_digits=12, decimal_places=2)
-    subscribers = serializers.SerializerMethodField()
+    subscribers = BillSubscriberNestedSerializer(many=True)
     attachments = serializers.SerializerMethodField()
 
     class Meta:
@@ -37,10 +35,6 @@ class BillReadSerializer(serializers.ModelSerializer):
     def get_status(self, obj):
         return utils.get_bill_status(obj)
 
-    def get_subscribers(self, obj):
-        subscribers = obj.subscriber_instances.all()
-        return self.BillSubscriberNestedSerializer(subscribers, many=True).data
-
     def get_attachments(self, obj):
         attachments = obj.attachments.all()
         return self.BillAttachmentNestedSerializer(
@@ -50,15 +44,6 @@ class BillReadSerializer(serializers.ModelSerializer):
 
 
 class BillWriteSerializer(serializers.ModelSerializer):
-
-    class BillSubscriberNestedSerializer(serializers.ModelSerializer):
-
-        class Meta:
-            model = models.BillSubscriber
-            fields = [
-                'id', 'user_id', 'amount',
-                'amount_paid', 'fulfilled',
-            ]
 
     class BillAttachmentNestedSerializer(serializers.Serializer):
         name = serializers.CharField(required=False)

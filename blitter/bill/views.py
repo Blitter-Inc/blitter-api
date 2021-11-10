@@ -21,11 +21,11 @@ class BillViewSet(ModelViewSet):
     def get_queryset(self):
         user_id = self.request.user.pk
         return models.Bill.objects.annotate(
-            settled_amount=Sum('subscriber_instances__amount_paid'),
+            settled_amount=Sum('subscribers__amount_paid'),
         ).filter(
-            Q(created_by__pk=user_id) | Q(subscribers__pk=user_id)
+            Q(created_by__pk=user_id) | Q(subscribers__user_id=user_id)
         ).distinct().prefetch_related(
-            'subscriber_instances', 'attachments',
+            'subscribers', 'attachments',
         )
 
     def get_serializer_class(self):
