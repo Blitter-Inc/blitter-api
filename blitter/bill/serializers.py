@@ -45,12 +45,6 @@ class BillReadSerializer(serializers.ModelSerializer):
 
 class BillWriteSerializer(serializers.ModelSerializer):
 
-    class BillAttachmentNestedSerializer(serializers.Serializer):
-        name = serializers.CharField(required=False)
-        file = serializers.FileField()
-
-    attachments = BillAttachmentNestedSerializer(
-        many=True, required=False, allow_null=True)
     subscribers = BillSubscriberNestedSerializer(
         many=True, required=False, allow_null=True)
     created_by = serializers.SerializerMethodField()
@@ -59,20 +53,14 @@ class BillWriteSerializer(serializers.ModelSerializer):
         model = models.Bill
         fields = '__all__'
 
-    def created_by(self, obj):
-        return obj.created_by
+    def get_created_by(self, obj):
+        return obj.created_by_id
 
     def create_subscribers(self, bill, subscribers):
         models.BillSubscriber.objects.bulk_create([
             models.BillSubscriber(bill=bill, **obj)
             for obj in subscribers
-        ])
-
-    def create_attachments(self, bill, attachments):
-        models.BillAttachment.objects.bulk_create([
-            models.BillAttachment(bill=bill, **obj)
-            for obj in attachments
-        ])
+        ], ignore_conflicts=True)
 
     def create(self, validated_data):
         user = self.context['request'].user
@@ -84,3 +72,23 @@ class BillWriteSerializer(serializers.ModelSerializer):
         if attachments:
             self.create_attachments(bill_obj, attachments)
         return bill_obj
+
+    def update(self, instance, validated_data):
+        subscribers = validated_data.pop('subscribers', None)
+        super().update(instance, validated_data)
+        if subscribers:
+            # Updating values for existing Bill subscribers
+            models.BillSubscriber.bulk_update_individual(subscribers)
+            # Adding new Bill subscribers
+            self.create_subscribers(instance, subscribers)
+            # Deleting Bill subscribers that are not in currently provided subscriber object
+            # and have amount_paid = 0
+            subscriber_user_ids = [obj['user'] for obj in subscribers]
+            models.BillSubscriber.objects.filter(
+                bill=instance,
+                amount_paid=0,
+            ).exclude(
+                user_id__in=subscriber_user_ids,
+            ).delete()
+
+        return instance
