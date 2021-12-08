@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from django.db import models
+from django.db import models, transaction
 
 from blitter.shared.models import TimestampMixin
 
@@ -51,9 +51,25 @@ class BillSubscriber(TimestampMixin, models.Model):
         db_table = 'bill_billsubscriber'
         verbose_name = 'Bill Subscriber'
         verbose_name_plural = 'Bill Subscribers'
+        constraints = [
+            models.UniqueConstraint(
+                fields=['bill', 'user'], name='unique_bill_subscriber')
+        ]
 
     def __str__(self):
         return f'ID: {self.pk} | {self.amount}/-'
+    
+    @classmethod
+    def bulk_update_individual(cls, subscribers: list[dict]):
+        with transaction.atomic():
+            for obj in subscribers:
+                user_id = obj.get('user')
+                if not user_id:
+                    continue
+                values_to_be_updated = obj.copy()
+                values_to_be_updated.pop('user')
+                cls.objects.filter(user_id=user_id).update(**values_to_be_updated)
+
 
 
 class BillAttachment(TimestampMixin, models.Model):
