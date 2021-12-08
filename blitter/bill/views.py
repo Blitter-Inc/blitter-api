@@ -31,6 +31,6 @@ class BillViewSet(ModelViewSet):
     def get_serializer_class(self):
         if self.request.method == 'GET':
             return serializers.BillReadSerializer
-        elif self.request.method == 'POST':
+        elif self.request.method == 'POST' or self.request.method == 'PATCH':
             return serializers.BillWriteSerializer
         return serializers.BillReadSerializer   # will change
