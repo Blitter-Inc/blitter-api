@@ -32,7 +32,7 @@ class CustomTokenObtainPairSerializer(serializers.Serializer):
             'name': attrs.get('name', ''),
             'email': attrs.get('email'),
             'avatar': attrs.get('avatar'),
-            'bio': attrs.get('bio'),
+            'bio': attrs.get('bio', ''),
         })
         token = TokenObtainPairSerializer.get_token(user)
 
