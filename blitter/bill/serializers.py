@@ -10,13 +10,14 @@ class BillSubscriberNestedSerializer(serializers.ModelSerializer):
         exclude = ['bill']
 
 
+class BillAttachmentNestedSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = models.BillAttachment
+        exclude = ['bill']
+
+
 class BillReadSerializer(serializers.ModelSerializer):
-
-    class BillAttachmentNestedSerializer(serializers.ModelSerializer):
-
-        class Meta:
-            model = models.BillAttachment
-            exclude = ['bill']
 
     status = serializers.SerializerMethodField()
     settled_amount = serializers.DecimalField(max_digits=12, decimal_places=2)
@@ -37,7 +38,7 @@ class BillReadSerializer(serializers.ModelSerializer):
 
     def get_attachments(self, obj):
         attachments = obj.attachments.all()
-        return self.BillAttachmentNestedSerializer(
+        return BillAttachmentNestedSerializer(
             attachments, many=True,
             context={'request': self.context['request']},
         ).data
@@ -47,7 +48,10 @@ class BillWriteSerializer(serializers.ModelSerializer):
 
     subscribers = BillSubscriberNestedSerializer(
         many=True, required=False, allow_null=True)
+    settled_amount = serializers.DecimalField(
+        max_digits=12, decimal_places=2, read_only=True)
     created_by = serializers.SerializerMethodField()
+    attachments = serializers.SerializerMethodField()
 
     class Meta:
         model = models.Bill
@@ -55,6 +59,13 @@ class BillWriteSerializer(serializers.ModelSerializer):
 
     def get_created_by(self, obj):
         return obj.created_by_id
+
+    def get_attachments(self, obj):
+        attachments = obj.attachments.all()
+        return BillAttachmentNestedSerializer(
+            attachments, many=True,
+            context={'request': self.context['request']},
+        ).data
 
     def create_subscribers(self, bill, subscribers):
         models.BillSubscriber.objects.bulk_create([
