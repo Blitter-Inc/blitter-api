@@ -5,7 +5,7 @@ from rest_framework.decorators import action
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.request import Request
 from rest_framework.response import Response
-from rest_framework import status
+from rest_framework import status, exceptions
 from rest_framework.filters import SearchFilter, OrderingFilter
 
 from blitter.shared.types import FetchAPIRequestType
@@ -58,3 +58,17 @@ class BillViewSet(ModelViewSet):
                 request, props)
 
         return Response(response_dict)
+
+    @action(methods=['POST'], detail=False, url_path='fetch-requested')
+    def fetch_requested(self, request: Request) -> Response:
+        ids = request.data.get('ids')
+        if ids == None:
+            raise exceptions.ParseError(detail="Provide 'ids' in payload")
+        queryset = models.Bill.objects.annotate(
+            settled_amount=Sum('subscribers__amount_paid'),
+        ).filter(id__in=ids).prefetch_related(
+            'subscribers', 'attachments',
+        )
+        serializer = serializers.BillReadSerializer(
+            queryset, many=True, context={'request': request})
+        return Response({obj['id']: obj for obj in serializer.data})
