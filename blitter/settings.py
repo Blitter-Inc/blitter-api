@@ -197,7 +197,3 @@ if DEBUG and ENABLE_SQL_LOGGING:
             },
         },
     }
-
-if DEBUG:
-    import django_stubs_ext
-    django_stubs_ext.monkeypatch()
