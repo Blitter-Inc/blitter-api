@@ -14,9 +14,6 @@ import os
 from datetime import timedelta
 from dotenv import dotenv_values
 from pathlib import Path
-import django_stubs_ext
-
-django_stubs_ext.monkeypatch()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -200,3 +197,7 @@ if DEBUG and ENABLE_SQL_LOGGING:
             },
         },
     }
+
+if DEBUG:
+    import django_stubs_ext
+    django_stubs_ext.monkeypatch()
