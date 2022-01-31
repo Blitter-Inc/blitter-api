@@ -1,6 +1,13 @@
+from dataclasses import dataclass
 from typing import TypedDict
 
 from blitter.shared.types import FetchAPIResponseDict
+
+
+@dataclass
+class BillStatus:
+    UNSETTLED = 'unsettled'
+    FULFILLED = 'fulfilled'
 
 
 class BillSubscriberResponseDict(TypedDict):
