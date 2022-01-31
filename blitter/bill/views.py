@@ -10,6 +10,7 @@ from rest_framework.filters import SearchFilter, OrderingFilter
 
 from blitter.shared.types import FetchAPIRequestType
 from blitter.shared.utils import FetchAPIRequestParser
+from . import filters
 from . import models
 from . import serializers
 from . import utils
@@ -18,7 +19,8 @@ from . import utils
 class BillViewSet(ModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
-    search_fields = ['name', 'description', 'type', 'created_by__name']
+    filterset_class = filters.BillFilter
+    search_fields = ['name', 'description', 'created_by__name']
     ordering_fields = [
         'name', 'amount', 'type',
         'created_by__name', 'created_at', 'updated_at',
@@ -49,13 +51,12 @@ class BillViewSet(ModelViewSet):
             return Response(data=parser.error_dict, status=status.HTTP_400_BAD_REQUEST)
 
         props = parser.props
-
         if props.request_type == FetchAPIRequestType.INITIAL:
             response_dict = utils.generate_initial_fetch_response(
-                request, props)
+                request, props, self.filter_queryset)
         elif props.request_type == FetchAPIRequestType.REFRESH:
             response_dict = utils.generate_refresh_fetch_response(
-                request, props)
+                request, props, self.filter_queryset)
 
         return Response(response_dict)
 

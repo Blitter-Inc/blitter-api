@@ -1,7 +1,7 @@
-from dataclasses import dataclass
 from django.db import models, transaction
 
 from blitter.shared.models import TimestampMixin
+from . import manager
 
 
 class Bill(TimestampMixin, models.Model):
@@ -13,11 +13,6 @@ class Bill(TimestampMixin, models.Model):
         OUTING = 'outing', 'Outing'
         MISC = 'miscelleneous', 'Miscellaneous'
 
-    @dataclass
-    class BillStatus:
-        UNSETTLED = 'unsettled'
-        FULFILLED = 'fulfilled'
-
     name = models.CharField('Bill name', max_length=254, blank=True)
     amount = models.DecimalField(
         'Amount', max_digits=12, decimal_places=2, blank=False)
@@ -26,6 +21,10 @@ class Bill(TimestampMixin, models.Model):
     description = models.TextField('Description', blank=True)
     created_by = models.ForeignKey(
         'user.User', on_delete=models.SET_NULL, related_name='created_bills', null=True)
+
+    objects: 'manager.BillManager' = manager.BillManager.from_queryset(
+        manager.BillQuerySet,
+    )()
 
     class Meta:
         db_table = 'bill_bill'
@@ -58,7 +57,7 @@ class BillSubscriber(TimestampMixin, models.Model):
 
     def __str__(self):
         return f'ID: {self.pk} | {self.amount}/-'
-    
+
     @classmethod
     def bulk_update_individual(cls, subscribers: list[dict]):
         with transaction.atomic():
@@ -68,8 +67,8 @@ class BillSubscriber(TimestampMixin, models.Model):
                     continue
                 values_to_be_updated = obj.copy()
                 values_to_be_updated.pop('user')
-                cls.objects.filter(user_id=user_id).update(**values_to_be_updated)
-
+                cls.objects.filter(user_id=user_id).update(
+                    **values_to_be_updated)
 
 
 class BillAttachment(TimestampMixin, models.Model):
