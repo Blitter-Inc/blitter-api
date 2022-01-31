@@ -8,6 +8,7 @@ from . import types
 
 
 class BillFilter(filters.FilterSet):
+    type = filters.MultipleChoiceFilter(choices=models.Bill.BillType.choices)
     status = filters.TypedChoiceFilter(
         choices=(
             (types.BillStatus.UNSETTLED, 'Unsettled'),
