@@ -62,6 +62,7 @@ class Transaction(TimestampMixin):
         NET_BANKING = 'net_banking', 'Net Banking'
 
     class TransactionStatus(models.TextChoices):
+        PENDING = 'pending', 'Pending'
         FAILED = 'failed', 'Failed'
         SUCCESS = 'success', 'Success'
 

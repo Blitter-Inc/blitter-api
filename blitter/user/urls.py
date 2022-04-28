@@ -8,6 +8,7 @@ from . import views
 router = DefaultRouter()
 router.register('', views.UserViewSet, basename='user')
 router.register('upi', views.UPIAddressViewSet, basename='upi')
+router.register('transaction', views.TransactionViewSet, basename='transaction')
 
 urlpatterns = [
     path('login/', views.CustomTokenObtainPairView.as_view()),
