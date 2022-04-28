@@ -2,6 +2,8 @@ from django.contrib.auth import get_user_model
 from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
+from . import models
+
 
 UserModel = get_user_model()
 
@@ -57,3 +59,10 @@ class FetchProfilesSerializer(serializers.Serializer):
             context={'request': request},
         ).data
         return {profile['id']: profile for profile in profiles}
+
+
+class UPIAddressSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = models.UPIAddress
+        fields = '__all__'
