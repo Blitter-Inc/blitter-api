@@ -10,13 +10,19 @@ UserModel = get_user_model()
 
 class UserSerializer(serializers.ModelSerializer):
 
+    upi = serializers.SerializerMethodField()
+
     class Meta:
         model = UserModel
         fields = ['id', 'firebase_id', 'name', 'phone',
-                  'email', 'avatar', 'bio', 'date_joined']
+                  'email', 'upi', 'avatar', 'bio', 'date_joined']
         extra_kwargs = {
             'firebase_id': {'write_only': True}
         }
+
+    def get_upi(self, instance):
+        upi = instance.primary_upi
+        return upi.address if upi else None
 
 
 class CustomTokenObtainPairSerializer(serializers.Serializer):
@@ -52,8 +58,9 @@ class FetchProfilesSerializer(serializers.Serializer):
     def validate(self, attrs):
         request = self.context['request']
         phone_numbers = attrs['phone_numbers']
-        phone_numbers.append(request.user.phone)       # fetching profile for current user as well
-        user_objects = UserModel.objects.filter(phone__in=phone_numbers)
+        # fetching profile for current user as well
+        phone_numbers.append(request.user.phone)
+        user_objects = UserModel.objects.filter(phone__in=phone_numbers).prefetch_related('upi_addresses')
         profiles = UserSerializer(
             user_objects, many=True,
             context={'request': request},

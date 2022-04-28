@@ -27,6 +27,10 @@ class User(TimestampMixin, AbstractBaseUser, PermissionsMixin):
     def __str__(self) -> str:
         return f'{self.phone} [{self.name}]'
 
+    @property
+    def primary_upi(self):
+        return self.upi_addresses.filter(is_primary=True).first()
+
 
 class UPIAddress(TimestampMixin):
 
