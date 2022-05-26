@@ -9,6 +9,7 @@ from rest_framework.mixins import ListModelMixin, DestroyModelMixin
 from rest_framework.viewsets import ViewSet, GenericViewSet
 from rest_framework_simplejwt.views import TokenViewBase
 
+from blitter.bill import models as bill_models
 from . import models
 from . import serializers
 
@@ -78,6 +79,14 @@ class TransactionViewSet(GenericViewSet, ListModelMixin):
     permission_classes = [IsAuthenticated]
     serializer_class = serializers.TransactionSerializer
 
+    def mark_bill_subscriber_as_paid(self, request):
+        subscriber = bill_models.BillSubscriber.objects.filter(
+            pk=request.data.get('subscriber_id'),
+        ).first()
+        subscriber.amount_paid = subscriber.amount
+        subscriber.fulfilled = True
+        subscriber.save()
+
     def get_queryset(self):
         user = self.request.user
         return models.Transaction.objects.filter(Q(sender=user) | Q(receiver=user))
@@ -95,6 +104,7 @@ class TransactionViewSet(GenericViewSet, ListModelMixin):
             data={**request.data, 'sender': request.user.pk})
         serializer.is_valid(raise_exception=True)
         serializer.save()
+        self.mark_bill_subscriber_as_paid(request)
         return Response(serializer.data)
 
     @action(methods=['PATCH'], detail=True)
