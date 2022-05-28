@@ -8,6 +8,7 @@ from rest_framework.response import Response
 from rest_framework.mixins import ListModelMixin, DestroyModelMixin
 from rest_framework.viewsets import ViewSet, GenericViewSet
 from rest_framework_simplejwt.views import TokenViewBase
+from rest_framework.filters import OrderingFilter
 
 from blitter.bill import models as bill_models
 from . import models
@@ -99,6 +100,8 @@ class UPIAddressViewSet(GenericViewSet, ListModelMixin, DestroyModelMixin):
 class TransactionViewSet(GenericViewSet, ListModelMixin):
     permission_classes = [IsAuthenticated]
     serializer_class = serializers.TransactionSerializer
+    filter_backends = [OrderingFilter]
+    ordering = ['-updated_at', '-created_at']
 
     def mark_bill_subscriber_as_paid(self, request):
         subscriber = bill_models.BillSubscriber.objects.select_related('bill').filter(
