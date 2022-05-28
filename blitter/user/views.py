@@ -1,5 +1,5 @@
 from django.contrib.auth import get_user_model
-from django.db.models import Q
+from django.db.models import Q, Sum
 from django.utils import timezone
 from rest_framework.decorators import action
 from rest_framework.exceptions import NotFound, ValidationError
@@ -42,6 +42,27 @@ class UserViewSet(ViewSet):
         )
         serializer.is_valid(raise_exception=True)
         return Response(serializer.validated_data)
+    
+    @action(methods=['GET'], detail=False, url_name='fetch-counters', url_path='fetch-counters')
+    def fetch_counters(self, request):
+        res = dict()
+        user_id = request.user.id
+        bill_query = bill_models.Bill.objects.filter(
+            Q(created_by__pk=user_id) | Q(subscribers__user_id=user_id)
+        ).distinct()
+        res['total_bill_count'] = bill_query.count()
+        
+        res['total_transaction_count'] = models.Transaction.objects.filter(Q(sender__pk=user_id) | Q(receiver__pk=user_id)).count()
+        
+        credit_transaction_query = models.Transaction.objects.filter(receiver__pk=user_id)
+        res['credit_transaction_count'] = credit_transaction_query.count()
+        res['credit_transaction_amount'] = credit_transaction_query.aggregate(credit_transaction_amount=Sum('amount'))['credit_transaction_amount']
+        
+        debit_transaction_query = models.Transaction.objects.filter(sender__pk=user_id)
+        res['debit_transaction_count'] = debit_transaction_query.count()
+        res['debit_transaction_amount'] = debit_transaction_query.aggregate(debit_transaction_amount=Sum('amount'))['debit_transaction_amount']
+
+        return Response(res)
 
 
 class UPIAddressViewSet(GenericViewSet, ListModelMixin, DestroyModelMixin):
@@ -80,12 +101,15 @@ class TransactionViewSet(GenericViewSet, ListModelMixin):
     serializer_class = serializers.TransactionSerializer
 
     def mark_bill_subscriber_as_paid(self, request):
-        subscriber = bill_models.BillSubscriber.objects.filter(
+        subscriber = bill_models.BillSubscriber.objects.select_related('bill').filter(
             pk=request.data.get('subscriber_id'),
         ).first()
         subscriber.amount_paid = subscriber.amount
         subscriber.fulfilled = True
         subscriber.save()
+        bill = subscriber.bill
+        bill.updated_at = timezone.now()
+        bill.save()
 
     def get_queryset(self):
         user = self.request.user

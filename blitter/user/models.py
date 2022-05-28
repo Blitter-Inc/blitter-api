@@ -60,6 +60,7 @@ class Transaction(TimestampMixin):
         CREDIT_CARD = 'credit_card', 'Credit Card'
         DEBIT_CARD = 'debit_card', 'Debit Card'
         NET_BANKING = 'net_banking', 'Net Banking'
+        CASH = 'cash', 'Cash'
 
     class TransactionStatus(models.TextChoices):
         PENDING = 'pending', 'Pending'
